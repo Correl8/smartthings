@@ -23,7 +23,7 @@ definition(
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
     iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"
-) 
+)
 preferences {
     section("Log devices...") {
         input "accelerations", "capability.accelerationSensor", title: "Accelerations", required: false, multiple: true
@@ -64,17 +64,17 @@ preferences {
         input "valves", "capability.valve", title: "Valves", required: false, multiple: true
         input "voltages", "capability.voltageMeasurement", title: "Voltages", required:false, multiple: true
         input "waterSensors", "capability.waterSensor", title: "Water sensors", required: false, multiple: true
-    } 
+    }
     section ("Correl8 API key...") {
         input "apiKey", "text", title: "API key"
     }
 }
- 
+
 def installed() {
     log.debug "Installed with settings: ${settings}"
     initialize()
 }
- 
+
 def updated() {
     unsubscribe()
     initialize()
@@ -140,21 +140,21 @@ def initialize() {
     }
 
     subscribe(accelerations, "acceleration", handleAccelerationEvent)
-    subscribe(airqualitysensors, "airQuality", handleLevel)
+    subscribe(airqualitysensors, "airQuality", handleInteger)
     subscribe(alarms, "alarm", handleString)
     subscribe(batteries, "battery", handleFloat)
     subscribe(buttons, "button", handleString)
-    subscribe(co2measurements, "carbonDioxide", handleLevel)
+    subscribe(co2measurements, "carbonDioxide", handleInteger)
     subscribe(codetectors, "carbonMonoxide", handleDetected)
-    subscribe(comeasurements, "carbonMonoxideLevel", handleLevel)
+    subscribe(comeasurements, "carbonMonoxideLevel", handleFloat)
     subscribe(colorcontrols, "hue", handleInteger)
     subscribe(colorcontrols, "saturation", handleInteger)
     subscribe(colortemperatures, "colorTemperature", handleInteger)
     subscribe(contacts, "contact", handleContactEvent)
     subscribe(doorcontrols, "door", handleString)
     subscribe(energies, "energy", handleFloat)
-    subscribe(illuminances, "illuminance", handleLevel)
-    subscribe(infrareds, "infraredLevel", handleLevel)
+    subscribe(illuminances, "illuminance", handleFloat)
+    subscribe(infrareds, "infraredLevel", handleFloat)
     subscribe(locks, "lock", handleLockEvent)
     subscribe(motions, "motion", handleMotionEvent)
     subscribe(powermeters, "power", handleFloat)
@@ -175,12 +175,12 @@ def initialize() {
     subscribe(thermostatmodes, "thermostatMode", handleString)
     subscribe(thermostatoperatingstates, "thermostatOperatingState", handleString)
     subscribe(thermostatsetpoints, "thermostatSetpoint", handleFloat)
-    subscribe(ultravioletindexes, "ultravioletIndex", handleLevel)
+    subscribe(ultravioletindexes, "ultravioletIndex", handleFloat)
     subscribe(valves, "valve", handleContactEvent)
     subscribe(voltages, "voltage", handleFloat)
     subscribe(waterSensors, "water", handleWaterEvent)
 }
- 
+
 def handleAccelerationEvent(evt) {
     def e = [
         sensor: evt.displayName.trim(),
@@ -189,7 +189,7 @@ def handleAccelerationEvent(evt) {
     ]
     sendValue(e)
 }
- 
+
 def handleButtonEvent(evt) {
     def e = [
         sensor: evt.displayName.trim(),
@@ -207,7 +207,7 @@ def handleContactEvent(evt) {
     ]
     sendValue(e)
 }
- 
+
 def handleDetected(evt) {
     def e = [
         sensor: evt.displayName.trim(),
@@ -235,15 +235,6 @@ def handleInteger(evt) {
     sendValue(e)
 }
 
-def handleLevel(evt) {
-    def e = [
-        sensor: evt.displayName.trim(),
-        name: "level",
-        value: evt.value
-    ]
-    sendValue(e)
-}
- 
 def handleLockEvent(evt) {
     def e = [
         sensor: evt.displayName.trim(),
@@ -252,7 +243,7 @@ def handleLockEvent(evt) {
     ]
     sendValue(e)
 }
- 
+
 def handleMotionEvent(evt) {
     def e = [
         sensor: evt.displayName.trim(),
@@ -261,7 +252,7 @@ def handleMotionEvent(evt) {
     ]
     sendValue(e)
 }
- 
+
 def handlePresenceEvent(evt) {
     def e = [
         sensor: evt.displayName.trim(),
@@ -270,7 +261,7 @@ def handlePresenceEvent(evt) {
     ]
     sendValue(e)
 }
- 
+
 def handleString(evt) {
     def e = [
         sensor: evt.displayName.trim(),
@@ -297,18 +288,18 @@ def handleWaterEvent(evt) {
     ]
     sendValue(e)
 }
- 
+
 private sendValue(event) {
     def sensor = event.sensor
     def name = event.name
     def value = event.value
-       
+
     log.debug "Logging ${sensor} to Correl8: ${name} = ${value}"
     // hand crafted JSON
     def msgBody = """{"${sensor}":{"${name}": ${value}}}"""
 
     log.debug "${msgBody}"
-    
+
     def params = [
         // headers: ["Content-Type": "application/json"],
         uri: "https://api.correl8.me",

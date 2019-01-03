@@ -84,21 +84,21 @@ def initialize() {
     log.debug "Initializing smartthings: ${settings}"
     def dataTypes = [:]
     accelerations.each{ dataTypes.put("${it}.acceleration", "boolean") }
-    airqualitysensors.each{ dataTypes.put("${it}.level", "integer") }
+    airqualitysensors.each{ dataTypes.put("${it}.airQuality", "integer") }
     alarms.each{ dataTypes.put("${it}.alarm", "keyword") }
     batteries.each{ dataTypes.put("${it}.battery", "integer") }
     buttons.each{ dataTypes.put("${it}.button", "string") }
-    co2measurements.each{ dataTypes.put("${it}.level", "integer") }
+    co2measurements.each{ dataTypes.put("${it}.carbonDioxide", "integer") }
     codetectors.each{ dataTypes.put("${it}.detected", "boolean") }
-    comeasurements.each{ dataTypes.put("${it}.level", "float") }
+    comeasurements.each{ dataTypes.put("${it}.carbonMonoxideLevel", "float") }
     colorcontrols.each{ dataTypes.put("${it}.hue", "integer") }
     colorcontrols.each{ dataTypes.put("${it}.saturation", "integer") }
     colortempereatures.each{ dataTypes.put("${it}.colorTemperature", "integer") }
     contacts.each{ dataTypes.put("${it}.open", "boolean") }
     doorcontrols.each{ dataTypes.put("${it}.door", "string") }
     energies.each{ dataTypes.put("${it}.energy", "float") }
-    illuminances.each{ dataTypes.put("${it}.level", "float") }
-    infrareds.each{ dataTypes.put("${it}.level", "float") }
+    illuminances.each{ dataTypes.put("${it}.illuminance", "float") }
+    infrareds.each{ dataTypes.put("${it}.infraredLevel", "float") }
     locks.each{ dataTypes.put("${it}.locked", "boolean") }
     motions.each{ dataTypes.put("${it}.motion", "boolean") }
     powermeters.each{ dataTypes.put("${it}.power", "float") }
@@ -119,7 +119,7 @@ def initialize() {
     thermostatmodes.each{ dataTypes.put("${it}.mode", "string") }
     thermostatoperatingstates.each{ dataTypes.put("${it}.mode", "string") }
     thermostatsetpoints.each{ dataTypes.put("${it}.setpoint", "float") }
-    ultravioletindexes.each{ dataTypes.put("${it}.level", "float") }
+    ultravioletindexes.each{ dataTypes.put("${it}.ultravioletIndex", "float") }
     valves.each{ dataTypes.put("${it}.open", "boolean") }
     voltages.each{ dataTypes.put("${it}.voltage", "float") }
     watersensors.each{ dataTypes.put("${it}.detected", "boolean") }

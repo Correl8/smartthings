@@ -45,7 +45,7 @@ preferences {
         input "motions", "capability.motionSensor", title: "Motions", required: false, multiple: true
         input "powermeters", "capability.powerMeter", title: "Power Meters", required:false, multiple: true
         input "powersources", "capability.powerSource", title: "Power Sources", required:false, multiple: true
-        input "presences", "capability.presenceSensor", title: "Presence", required: false, multiple: true
+        input "presences", "capability.presenceSensor", title: "Presence Sensors", required: false, multiple: true
         input "humidities", "capability.relativeHumidityMeasurement", title: "Humidities", required: false, multiple: true
         input "signalstrengths", "capability.signalStrength", title: "Signal strengths", required: false, multiple: true
         input "smokedetectors", "capability.smokeDetector", title: "Smoke detectors", required:false, multiple: true
@@ -159,7 +159,7 @@ def initialize() {
     subscribe(motions, "motion", handleMotionEvent)
     subscribe(powermeters, "power", handleFloat)
     subscribe(powersources, "power", handleString)
-    subscribe(presence, "presence", handlePresenceEvent)
+    subscribe(presences, "presence", handlePresenceEvent)
     subscribe(humidities, "humidity", handleFloat)
     subscribe(signalstrengths, "lqi", handleInteger)
     subscribe(signalstrengths, "rssi", handleFloat)
@@ -266,7 +266,7 @@ def handleString(evt) {
     def e = [
         sensor: evt.displayName.trim(),
         name: evt.name,
-        value: evt.value.trim()
+        value: '"' + evt.value.trim() + '"'
     ]
     sendValue(e)
 }

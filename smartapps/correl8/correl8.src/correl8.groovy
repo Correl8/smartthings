@@ -1,25 +1,24 @@
 /**
- * Log SmartThings events to Correl8.me
+ *  Log SmartThings events to Correl8.me using ECS
  *
- * Copyright 2015 Samuel Rinnetmäki
+ *  Copyright 2019 Samuel Rinnetmäki
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at:
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
- * for the specific language governing permissions and limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
  *
  */
-
 definition(
-    name: "Correl8",
+    name: "correl8_ecs",
     namespace: "Correl8",
     author: "Samuel Rinnetmäki",
-    description: "Log to Correl8.me",
-    category: "Convenience",
+    description: "New version of correl8",
+    category: "SmartThings Labs",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
     iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"
@@ -71,72 +70,135 @@ preferences {
 }
 
 def installed() {
-    log.debug "Installed with settings: ${settings}"
+    def logMsg = "Installed."
+    sendEvent(name:"correl8", value:"installed",descriptionText:logMsg, eventType:"SMART_APP_EVENT", displayed: true)
+    log.info(logMsg)
     initialize()
 }
 
 def updated() {
     unsubscribe()
     initialize()
+    def logMsg = "Configuration updated."
+    sendEvent(name:"correl8", value:"updated",descriptionText:logMsg, eventType:"SMART_APP_EVENT", displayed: true)
+    log.info(logMsg)
 }
 
 def initialize() {
-    log.debug "Initializing smartthings: ${settings}"
-    def dataTypes = [:]
-    accelerations.each{ dataTypes.put("${it}.acceleration", "boolean") }
-    airqualitysensors.each{ dataTypes.put("${it}.airQuality", "integer") }
-    alarms.each{ dataTypes.put("${it}.alarm", "keyword") }
-    batteries.each{ dataTypes.put("${it}.battery", "integer") }
-    buttons.each{ dataTypes.put("${it}.button", "string") }
-    co2measurements.each{ dataTypes.put("${it}.carbonDioxide", "integer") }
-    codetectors.each{ dataTypes.put("${it}.detected", "boolean") }
-    comeasurements.each{ dataTypes.put("${it}.carbonMonoxideLevel", "float") }
-    colorcontrols.each{ dataTypes.put("${it}.hue", "integer") }
-    colorcontrols.each{ dataTypes.put("${it}.saturation", "integer") }
-    colortempereatures.each{ dataTypes.put("${it}.colorTemperature", "integer") }
-    contacts.each{ dataTypes.put("${it}.open", "boolean") }
-    doorcontrols.each{ dataTypes.put("${it}.door", "string") }
-    energies.each{ dataTypes.put("${it}.energy", "float") }
-    illuminances.each{ dataTypes.put("${it}.illuminance", "float") }
-    infrareds.each{ dataTypes.put("${it}.infraredLevel", "float") }
-    locks.each{ dataTypes.put("${it}.locked", "boolean") }
-    motions.each{ dataTypes.put("${it}.motion", "boolean") }
-    powermeters.each{ dataTypes.put("${it}.power", "float") }
-    powersources.each{ dataTypes.put("${it}.source", "string") }
-    presences.each{ dataTypes.put("${it}.presence", "boolean") }
-    humidities.each{ dataTypes.put("${it}.humidity", "float") }
-    signalstrengths.each{ dataTypes.put("${it}.lqi", "integer") }
-    signalstrengths.each{ dataTypes.put("${it}.rssi", "float") }
-    smokedetectors.each{ dataTypes.put("${it}.detected", "boolean") }
-    soundsensors.each{ dataTypes.put("${it}.detected", "boolean") }
-    switchlevels.each{ dataTypes.put("${it}.level", "integer") }
-    switches.each{ dataTypes.put("${it}.switch", "boolean") }
-    tamperalerts.each{ dataTypes.put("${it}.detected", "boolean") }
-    temperatures.each{ dataTypes.put("${it}.temperature", "float") }
-    thermostatcoolingsetpoints.each{ dataTypes.put("${it}.setpoint", "float") }
-    thermostatfanmodes.each{ dataTypes.put("${it}.setpoint", "string") }
-    thermostatheatingsetpoints.each{ dataTypes.put("${it}.setpoint", "float") }
-    thermostatmodes.each{ dataTypes.put("${it}.mode", "string") }
-    thermostatoperatingstates.each{ dataTypes.put("${it}.mode", "string") }
-    thermostatsetpoints.each{ dataTypes.put("${it}.setpoint", "float") }
-    ultravioletindexes.each{ dataTypes.put("${it}.ultravioletIndex", "float") }
-    valves.each{ dataTypes.put("${it}.open", "boolean") }
-    voltages.each{ dataTypes.put("${it}.voltage", "float") }
-    watersensors.each{ dataTypes.put("${it}.detected", "boolean") }
+    def logMsg = "Instalizing SmartThings."
+    sendEvent(name:"correl8", value:"initializing",descriptionText:logMsg, eventType:"SMART_APP_EVENT", displayed: true)
+    log.info(logMsg)
 
-    log.debug "Initializing correl8 with: ${dataTypes}"
+    def initObj = [
+      "device": [:],
+      "event": [
+        "device_name": "keyword",
+        "attribute": "keyword",
+        "value": "keyword"
+      ]
+    ]
+
+    accelerations.each{ initObj.device["${it}.acceleration"] = "boolean" }
+    initObj.event["acceleration"] = "boolean"
+    airqualitysensors.each{ initObj.device["${it}.airQuality"] = "long" }
+    initObj.event["airQuality"] = "long"
+    alarms.each{ initObj.device["${it}.alarm"] = "keyword" }
+    initObj.event["alarm"] = "keyword"
+    batteries.each{ initObj.device["${it}.battery"] = "long" }
+    initObj.event["battery"] = "long"
+    buttons.each{ initObj.device["${it}.button"] = "keyword" }
+    initObj.event["button"] = "keyword"
+    co2measurements.each{ initObj.device["${it}.carbonDioxide"] = "long" }
+    initObj.event["carbonDioxide"] = "long"
+    codetectors.each{ initObj.device["${it}.detected"] = "boolean" }
+    initObj.event["detected"] = "boolean"
+    comeasurements.each{ initObj.device["${it}.carbonMonoxideLevel"] = "float" }
+    initObj.event["carbonMonoxideLevel"] = "float"
+    colorcontrols.each{ initObj.device["${it}.hue"] = "long" }
+    initObj.event["hue"] = "long"
+    colorcontrols.each{ initObj.device["${it}.saturation"] = "long" }
+    initObj.event["saturation"] = "long"
+    colortempereatures.each{ initObj.device["${it}.colorTemperature"] = "long" }
+    initObj.event["colorTemperature"] = "long"
+    contacts.each{ initObj.device["${it}.open"] = "boolean" }
+    initObj.event["open"] = "boolean"
+    doorcontrols.each{ initObj.device["${it}.door"] = "keyword" }
+    initObj.event["door"] = "keyword"
+    energies.each{ initObj.device["${it}.energy"] = "float" }
+    initObj.event["energy"] = "float"
+    illuminances.each{ initObj.device["${it}.illuminance"] = "float" }
+    initObj.event["illuminance"] = "float"
+    infrareds.each{ initObj.device["${it}.infraredLevel"] = "float" }
+    initObj.event["infraredLevel"] = "float"
+    locks.each{ initObj.device["${it}.locked"] = "boolean" }
+    initObj.event["locked"] = "boolean"
+    motions.each{ initObj.device["${it}.motion"] = "boolean" }
+    initObj.event["motion"] = "boolean"
+    powermeters.each{ initObj.device["${it}.power"] = "float" }
+    initObj.event["power"] = "float"
+    powersources.each{ initObj.device["${it}.source"] = "keyword" }
+    initObj.event["source"] = "keyword"
+    presences.each{ initObj.device["${it}.presence"] = "boolean" }
+    initObj.event["presence"] = "boolean"
+    humidities.each{ initObj.device["${it}.humidity"] = "float" }
+    initObj.event["humidity"] = "float"
+    signalstrengths.each{ initObj.device["${it}.lqi"] = "long" }
+    initObj.event["lqi"] = "long"
+    signalstrengths.each{ initObj.device["${it}.rssi"] = "float" }
+    initObj.event["rssi"] = "float"
+    smokedetectors.each{ initObj.device["${it}.detected"] = "boolean" }
+    initObj.event["detected"] = "boolean"
+    soundsensors.each{ initObj.device["${it}.detected"] = "boolean" }
+    initObj.event["detected"] = "boolean"
+    switchlevels.each{ initObj.device["${it}.level"] = "long" }
+    initObj.event["level"] = "long"
+    switches.each{ initObj.device["${it}.switch"] = "boolean" }
+    initObj.event["switch"] = "boolean"
+    tamperalerts.each{ initObj.device["${it}.detected"] = "boolean" }
+    initObj.event["detected"] = "boolean"
+    temperatures.each{ initObj.device["${it}.temperature"] = "float" }
+    initObj.event["temperature"] = "float"
+    thermostatcoolingsetpoints.each{ initObj.device["${it}.coolingSetpoint"] = "float" }
+    initObj.event["coolingSetpoint"] = "float"
+    thermostatfanmodes.each{ initObj.device["${it}.thermostatFanMode"] = "keyword" }
+    initObj.event["thermostatFanMode"] = "keyword"
+    thermostatheatingsetpoints.each{ initObj.device["${it}.heatingSetpoint"] = "float" }
+    initObj.event["heatingSetpoint"] = "float"
+    thermostatmodes.each{ initObj.device["${it}.mode"] = "keyword" }
+    initObj.event["mode"] = "keyword"
+    thermostatoperatingstates.each{ initObj.device["${it}.mode"] = "keyword" }
+    initObj.event["mode"] = "keyword"
+    thermostatsetpoints.each{ initObj.device["${it}.thermostatSetpoint"] = "float" }
+    initObj.event["thermostatSetpoint"] = "float"
+    ultravioletindexes.each{ initObj.device["${it}.ultravioletIndex"] = "float" }
+    initObj.event["ultravioletIndex"] = "float"
+    valves.each{ initObj.device["${it}.open"] = "boolean" }
+    initObj.event["open"] = "boolean"
+    voltages.each{ initObj.device["${it}.voltage"] = "float" }
+    initObj.event["voltage"] = "float"
+    watersensors.each{ initObj.device["${it}.detected"] = "boolean" }
+    initObj.event["detected"] = "boolean"
+
+    logMsg = "Initializing correl8 with: ${initObj}"
+    sendEvent(name:"correl8", value:"initializing", descriptionText:logMsg, data:initObj, eventType:"SMART_APP_EVENT", displayed: true)
+    log.info(logMsg)
 
     def params = [
-        uri: "http://api.correl8.me",
-        path: "/smartthings/init/",
-        query: dataTypes
+        // uri: "http://api.correl8.me",
+        uri: "http://correl8.me:3030",
+        path: "/smartthings-ecs/init/",
+        body: initObj
     ]
     try {
-        httpGet(params) { resp ->
-            log.debug "Initialized ${resp.status}"
+        httpPutJson(params) { resp ->
+            logMsg = "Correl8 initialization done: ${resp.status}"
+            sendEvent(name:"correl8", value:"initialized", descriptionText:logMsg, data:resp, eventType:"SMART_APP_EVENT", displayed: true)
+            log.info(logMsg)
         }
     } catch (e) {
-        log.warn "Correl8.me initialization failed: ${e}"
+        logMsg = "Correl8 initialization failed: ${e}"
+        sendEvent(name:"correl8", value:"initialization failed",descriptionText:logMsg, data:e, eventType:"SMART_APP_EVENT", displayed: true)
+        log.warn(logMsg)
     }
 
     subscribe(accelerations, "acceleration", handleAccelerationEvent)
@@ -179,18 +241,25 @@ def initialize() {
     subscribe(valves, "valve", handleContactEvent)
     subscribe(voltages, "voltage", handleFloat)
     subscribe(waterSensors, "water", handleWaterEvent)
+
+    logMsg = "Subscribed to events."
+    sendEvent(name:"correl8", value:"subscribed",descriptionText:logMsg, eventType:"SMART_APP_EVENT", displayed: true)
+    log.info(logMsg)
+
 }
 
 def handleAccelerationEvent(evt) {
+    sendEvent(name:evt.name, value:evt.value,descriptionText:"${evt.displayName}: ${evt.name}=${evt.value}", data:evt, eventType:"SMART_APP_EVENT", displayed: false)
     def e = [
         sensor: evt.displayName.trim(),
         name: evt.name,
-        value: evt.value == "active" ? "true" : "false"
+        value: evt.value == "active" ? true : false
     ]
     sendValue(e)
 }
 
 def handleButtonEvent(evt) {
+    sendEvent(name:evt.name, value:evt.value,descriptionText:"${evt.displayName}: ${evt.name}=${evt.value}", data:evt, eventType:"SMART_APP_EVENT", displayed: false)
     def e = [
         sensor: evt.displayName.trim(),
         name: "pushed",
@@ -200,24 +269,27 @@ def handleButtonEvent(evt) {
 }
 
 def handleContactEvent(evt) {
+    sendEvent(name:evt.name, value:evt.value,descriptionText:"${evt.displayName}: ${evt.name}=${evt.value}", data:evt, eventType:"SMART_APP_EVENT", displayed: false)
     def e = [
         sensor: evt.displayName.trim(),
         name: "open",
-        value: evt.value == "open" ? "true" : "false"
+        value: evt.value == "open" ? true : false
     ]
     sendValue(e)
 }
 
 def handleDetected(evt) {
+    sendEvent(name:evt.name, value:evt.value,descriptionText:"${evt.displayName}: ${evt.name}=${evt.value}", data:evt, eventType:"SMART_APP_EVENT", displayed: false)
     def e = [
         sensor: evt.displayName.trim(),
         name: "detected",
-        value: evt.value == "detected" ? "true" : "false"
+        value: evt.value == "detected" ? true : false
     ]
     sendValue(e)
 }
 
 def handleFloat(evt) {
+    sendEvent(name:evt.name, value:evt.value,descriptionText:"${evt.displayName}: ${evt.name}=${evt.value}", data:evt, eventType:"SMART_APP_EVENT", displayed: false)
     def e = [
         sensor: evt.displayName.trim(),
         name: evt.name,
@@ -227,6 +299,7 @@ def handleFloat(evt) {
 }
 
 def handleInteger(evt) {
+    sendEvent(name:evt.name, value:evt.value,descriptionText:"${evt.displayName}: ${evt.name}=${evt.value}", data:evt, eventType:"SMART_APP_EVENT", displayed: false)
     def e = [
         sensor: evt.displayName.trim(),
         name: evt.name,
@@ -236,55 +309,61 @@ def handleInteger(evt) {
 }
 
 def handleLockEvent(evt) {
+    sendEvent(name:evt.name, value:evt.value,descriptionText:"${evt.displayName}: ${evt.name}=${evt.value}", data:evt, eventType:"SMART_APP_EVENT", displayed: false)
     def e = [
         sensor: evt.displayName.trim(),
         name: "locked",
-        value: evt.value == "locked" ? "true" : "false"
+        value: evt.value == "locked" ? true : false
     ]
     sendValue(e)
 }
 
 def handleMotionEvent(evt) {
+    sendEvent(name:evt.name, value:evt.value,descriptionText:"${evt.displayName}: ${evt.name}=${evt.value}", data:evt, eventType:"SMART_APP_EVENT", displayed: false)
     def e = [
         sensor: evt.displayName.trim(),
         name: evt.name,
-        value: evt.value == "active" ? "true" : "false"
+        value: evt.value == "active" ? true : false
     ]
     sendValue(e)
 }
 
 def handlePresenceEvent(evt) {
+    sendEvent(name:evt.name, value:evt.value,descriptionText:"${evt.displayName}: ${evt.name}=${evt.value}", data:evt, eventType:"SMART_APP_EVENT", displayed: false)
     def e = [
         sensor: evt.displayName.trim(),
         name: evt.name,
-        value: evt.value == "present" ? "true" : "false"
+        value: evt.value == "present" ? true : false
     ]
     sendValue(e)
 }
 
 def handleString(evt) {
+    sendEvent(name:evt.name, value:evt.value,descriptionText:"${evt.displayName}: ${evt.name}=${evt.value}", data:evt, eventType:"SMART_APP_EVENT", displayed: false)
     def e = [
         sensor: evt.displayName.trim(),
         name: evt.name,
-        value: '"' + evt.value.trim() + '"'
+        value: evt.value.trim()
     ]
     sendValue(e)
 }
 
 def handleSwitchEvent(evt) {
+    sendEvent(name:evt.name, value:evt.value,descriptionText:"${evt.displayName}: ${evt.name}=${evt.value}", data:evt, eventType:"SMART_APP_EVENT", displayed: false)
     def e = [
         sensor: evt.displayName.trim(),
         name: evt.name,
-        value: evt.value == "on" ? "true" : "false"
+        value: evt.value == "on" ? true : false
     ]
     sendValue(e)
 }
 
 def handleWaterEvent(evt) {
+    sendEvent(name:evt.name, value:evt.value,descriptionText:"${evt.displayName}: ${evt.name}=${evt.value}", data:evt, eventType:"SMART_APP_EVENT", displayed: false)
     def e = [
         sensor: evt.displayName.trim(),
         name: "wet",
-        value: evt.value == "wet" ? "true" : "false"
+        value: evt.value == "wet" ? true : false
     ]
     sendValue(e)
 }
@@ -294,24 +373,40 @@ private sendValue(event) {
     def name = event.name
     def value = event.value
 
-    log.debug "Logging ${sensor} to Correl8: ${name} = ${value}"
-    // hand crafted JSON
-    def msgBody = """{"${sensor}":{"${name}": ${value}}}"""
+    def logMsg = "Logging ${sensor} to Correl8: ${name} = ${value}"
+    sendEvent(name:name, value:value, descriptionText:logMsg, data:$event, eventType:"SMART_APP_EVENT", displayed: true)
+    log.info(logMsg)
 
-    log.debug "${msgBody}"
+    def msgBody = [:]
+    msgBody.device = [:]
+    msgBody.device[sensor] = [:]
+    msgBody.device[sensor][name] = value
+    msgBody.event = [:]
+    msgBody.event[name] = value
+    msgBody.event.device_name = sensor
+    msgBody.event.attribute = name
+    msgBody.event.value = value
+
+    log.debug("${msgBody}")
+    sendEvent(name:name, value:value, descriptionText:msgBody, eventType:"SMART_APP_EVENT", displayed: false)
 
     def params = [
         // headers: ["Content-Type": "application/json"],
-        uri: "https://api.correl8.me",
-        path: "/smartthings",
+        // uri: "https://api.correl8.me",
+        uri: "http://correl8.me:3030",
+        path: "/smartthings-ecs",
         body: msgBody
     ]
 
     try {
         httpPostJson(params) { resp ->
-            log.debug "Logged ${resp.status}"
+            logMsg = "Logged ${msgBody}: ${resp.status}"
+            sendEvent(name:"correl8", value:resp.status, descriptionText:logMsg, data:$resp, eventType:"SMART_APP_EVENT", displayed: false)
+            log.info(logMsg)
         }
     } catch (e) {
-        log.warn "Logging to Correl8.me failed: ${e}"
+        logMsg = "Logging to Correl8.me failed: ${e}"
+        sendEvent(name:"correl8", value:"error", descriptionText:logMsg, data:$e, eventType:"SMART_APP_EVENT", displayed: true)
+        log.warn(logMsg)
     }
 }
